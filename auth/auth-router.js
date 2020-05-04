@@ -25,7 +25,10 @@ router.post('/login', checkAuthBody, (req, res) => {
       if (user && bcrypt.compareSync(req.credentials.password, user.password)) {
         res.status(status.OK).json({
           message: "Logged in!",
-          index: ind,
+          user: {
+            id: user.id,
+            username: user.username,
+          },
           token: sign(req.credentials),
         });
       } else {
