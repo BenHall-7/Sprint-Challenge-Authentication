@@ -3,7 +3,7 @@ const status = require("http-status-codes");
 
 module.exports = (req, res, next) => {
   try {
-    const decoded = jwt.verify(req.headers.authorization, process.env.SECRET);
+    const decoded = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
       db("users")
         .where({username: decoded.username, password: decoded.password})
         .then(([user]) => {

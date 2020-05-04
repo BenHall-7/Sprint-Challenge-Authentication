@@ -56,7 +56,7 @@ function checkAuthBody(req, res, next) {
 }
 
 function sign(creds) {
-  return jwt.sign(creds, process.env.SECRET, {expiresIn: "1d"})
+  return jwt.sign(creds, process.env.JWT_SECRET, {expiresIn: "1d"})
 }
 
 module.exports = router;
