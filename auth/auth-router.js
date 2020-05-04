@@ -10,15 +10,29 @@ router.post('/register', checkAuthBody, (req, res) => {
     .insert(req.credentials)
     .then(([ind]) => {
       res.status(status.CREATED).json({
-        message: "logged in!",
+        message: "Registered!",
         index: ind,
-        token: jwt.sign(req.credentials.password, process.env.SECRET),
+        token: sign(req.credentials),
       });
     })
+    .catch(() => { res.status(status.INTERNAL_SERVER_ERROR).json({error: "Error registering user"}) })
 });
 
 router.post('/login', checkAuthBody, (req, res) => {
-  // implement login
+  db("users")
+    .where({username: req.credentials.username})
+    .then(user => {
+      if (user && bcrypt.compareSync(req.credentials.password, user.password)) {
+        res.status(status.OK).json({
+          message: "Logged in!",
+          index: ind,
+          token: sign(req.credentials),
+        });
+      } else {
+        res.status(status.UNAUTHORIZED).json({error: "Username or Password is incorrect"})
+      }
+    })
+    .catch(() => { res.status(status.UNAUTHORIZED).json({error: "Username or Password is incorrect"}) })
 });
 
 function checkAuthBody(req, res, next) {
@@ -36,6 +50,10 @@ function checkAuthBody(req, res, next) {
   } else {
     res.status(status.BAD_REQUEST).json({error: "Request missing body"})
   }
+}
+
+function sign(creds) {
+  return jwt.sign(creds, process.env.SECRET, {expiresIn: "1d"})
 }
 
 module.exports = router;
