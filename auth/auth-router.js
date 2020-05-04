@@ -20,9 +20,10 @@ router.post('/register', checkAuthBody, (req, res) => {
 
 router.post('/login', checkAuthBody, (req, res) => {
   db("users")
-    .where({username: req.credentials.username})
+    .where({username: req.body.username})
+    .first()
     .then(user => {
-      if (user && bcrypt.compareSync(req.credentials.password, user.password)) {
+      if (user && bcrypt.compareSync(req.body.password, user.password)) {
         res.status(status.OK).json({
           message: "Logged in!",
           user: {
@@ -44,7 +45,7 @@ function checkAuthBody(req, res, next) {
       && typeof req.body.password === "string") {
         req.credentials = {
           username: req.body.username,
-          password: bcrypt.hashSync(req.body.password, 12),
+          password: hash(req.body.password),
         };
         next()
     } else {
@@ -53,6 +54,10 @@ function checkAuthBody(req, res, next) {
   } else {
     res.status(status.BAD_REQUEST).json({error: "Request missing body"})
   }
+}
+
+function hash(password) {
+  return bcrypt.hashSync(password, 12);
 }
 
 function sign(creds) {
